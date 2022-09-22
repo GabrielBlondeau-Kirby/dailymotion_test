@@ -1,9 +1,9 @@
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from rest_framework.decorators import api_view
-
-from .tools import check_all_required_fields
-
+from .codeSecure_service import CodeSecure
+from .tools import check_all_required_fields, bcolors
 from .models import User
+from datetime import datetime, timedelta
 
 
 @api_view(["GET"])
@@ -36,6 +36,10 @@ def create_user(request):
     print(user)
 
     # Send 4 digit
+    code = CodeSecure().send_digit_code(body['email'], code_type="4digit", timeout_seconds=60)
+    end = datetime.today() + timedelta(minutes=1)
+
+    user.update({"code": code, "code_end_on": end.timestamp()})
 
     resp = {
         "user_id": user.uuid,

@@ -25,6 +25,7 @@ class base_object:
     def update(self, data: dict = None, uuid: str = None):
         db = firestore.client()
         uuid = uuid if self.uuid is None else self.uuid
+        print(f"updating user {uuid} | data: {data}")
         if uuid is None:
             raise Exception("No uiid")
         db.collection(self.collection).document(uuid).update(data)
@@ -43,6 +44,9 @@ class User(base_object):
         self.is_verified: bool = False
         self.status: str = None
         self.email: str = None
+
+        self.code: int = None
+        self.code_end_on: float =None
 
     def __repr__(self):
         return (
