@@ -33,6 +33,16 @@ class base_object:
             self.__setattr__(att, value)
         return self
 
+    def get_by_email(self, email: str):
+        db = firestore.client()
+
+        # I should check the count of the Query's result
+        doc = db.collection(self.collection).where('email', '==', email).get()[0]
+        self.uuid = doc.id
+        for att, value in doc.to_dict().items():
+            self.__setattr__(att, value)
+        return self
+
 
 class User(base_object):
     def __init__(self):

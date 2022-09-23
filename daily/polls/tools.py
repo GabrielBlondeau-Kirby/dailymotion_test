@@ -23,3 +23,25 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+
+def encode(txt: str):
+    import base64
+
+    message_bytes = txt.encode('ascii')
+    base64_bytes = base64.b64encode(message_bytes)
+    base64_message = base64_bytes.decode('ascii')
+
+    return base64_message
+
+
+def decode(txt: str):
+    import base64
+
+    base64_bytes = txt.encode("ascii")
+
+    sample_string_bytes = base64.b64decode(base64_bytes)
+    decoded_txt = sample_string_bytes.decode("ascii")
+
+    print(f"Decoded string: {decoded_txt}")
+    return decoded_txt
