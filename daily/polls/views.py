@@ -51,8 +51,7 @@ def create_user(request: Request):
     print(user)
 
     # Send 4 digit
-    code = CodeSecure().send_digit_code(body['email'], code_type="4digit", timeout_seconds=60)
-    end = datetime.today() + timedelta(minutes=1)
+    code, end = create_token(body["email"])
 
     user.update({"code": code, "code_end_on": end.timestamp()})
 
@@ -77,12 +76,11 @@ def verify_user(request: Request):
     mandatory_fields = ["digit_code"]
     body = request.data
     print(f"{bcolors.OKCYAN}User: {request.user}{bcolors.ENDC}")
-    # headers = request.headers
 
     fields = body.keys()
 
     if not check_all_required_fields(fields, mandatory_fields):
-        print(f"Failed : {fields} | {mandatory_fields}")
+        print(f"{bcolors.FAIL}Failed : {fields} | {mandatory_fields}{bcolors.ENDC}")
         return HttpResponseBadRequest(f"Digit code is missing")
 
     code = body['digit_code']
@@ -97,4 +95,25 @@ def verify_user(request: Request):
     if (user.code_end_on - datetime.today().timestamp()) < 1:
         return HttpResponseBadRequest(f"Token timeout")
 
+    user.update({"status": "active", "is_verified": True})
+
     return JsonResponse(user.to_json())
+
+
+@api_view(["GET"])
+def refresh_token(request: Request):
+    user = User().get_by_email(str(request.user))    # request.user => email
+
+    code, end = create_token(user.email)
+
+    user.update({"code": code, "code_end_on": end.timestamp()})
+
+    return JsonResponse(user.to_json())
+
+
+def create_token(email: str) -> (int, datetime):
+    # Send 4 digit
+    code = CodeSecure().send_digit_code(email, code_type="4digit", timeout_seconds=60)
+    end = datetime.today() + timedelta(minutes=1)
+    print(f"{bcolors.OKBLUE} New code: {code} | {bcolors.OKCYAN}end at: {end}{bcolors.ENDC}")
+    return code, end
