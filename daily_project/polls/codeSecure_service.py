@@ -1,5 +1,4 @@
 from random import randrange
-from django.test.client import RequestFactory
 
 from .tools import bcolors
 

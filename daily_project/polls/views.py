@@ -10,6 +10,7 @@ from .codeSecure_service import CodeSecure
 from .tools import check_all_required_fields, bcolors
 from .models import User
 
+
 class HttpResponseUnauthorized(HttpResponse):
     def __init__(self):
         super().__init__('401 Unauthorized', status=401)
@@ -36,8 +37,6 @@ def create_user(request: Request):
 
     print(f"Is authenticates: {request.user.is_authenticated}")
 
-    return JsonResponse({42:42})
-
     if not check_all_required_fields(fields, mandatory_fields):
         print(f"Failed : {fields} | {mandatory_fields}")
         return HttpResponseBadRequest(f"Missing field to create a user. One of {mandatory_fields}")
@@ -48,21 +47,13 @@ def create_user(request: Request):
     # For Basic Auth
     DjUser.objects.create_user(body['email'], body['email'], body['password'], ).save()
 
-    print(user)
-
     # Send 4 digit
     code, end = create_token(body["email"])
 
     user.update({"code": code, "code_end_on": end.timestamp()})
 
     resp = {
-        "user_id": user.uuid,
-        "status": user.status,
-        "debug": {
-            "email": body["email"],
-            "pw": body["password"],
-            "user": user.to_json()
-        },
+        "user": user.to_json(),
     }
 
     return JsonResponse(resp)
@@ -71,6 +62,7 @@ def create_user(request: Request):
 @api_view(["POST"])
 def verify_user(request: Request):
     if not request.user.is_authenticated:
+        print(f"{bcolors.FAIL}Code is wrong format{bcolors.ENDC}")
         return HttpResponseUnauthorized()
 
     mandatory_fields = ["digit_code"]
@@ -83,16 +75,21 @@ def verify_user(request: Request):
         print(f"{bcolors.FAIL}Failed : {fields} | {mandatory_fields}{bcolors.ENDC}")
         return HttpResponseBadRequest(f"Digit code is missing")
 
-    code = body['digit_code']
-    if not isinstance(code, int):
+    try:
+        code = int(body['digit_code'])
+        print(f"Code: {code} | {code.__class__}")
+    except Exception as e:
+        print(f"{bcolors.WARNING}Code is wrong format | error: {e}{bcolors.ENDC}")
         return HttpResponseBadRequest("Code is not is good format")
 
     user = User().get_by_email(str(request.user))    # request.user => email
 
     if code != user.code:
+        print(f"{bcolors.WARNING}Code is wrong{bcolors.ENDC}")
         return HttpResponseBadRequest(f"Something is wrong with the token")
 
     if (user.code_end_on - datetime.today().timestamp()) < 1:
+        print(f"{bcolors.WARNING}Timeout{bcolors.ENDC}")
         return HttpResponseBadRequest(f"Token timeout")
 
     user.update({"status": "active", "is_verified": True})
@@ -108,7 +105,7 @@ def refresh_token(request: Request):
 
     user.update({"code": code, "code_end_on": end.timestamp()})
 
-    return JsonResponse(user.to_json())
+    return JsonResponse({"digit_code": code})
 
 
 def create_token(email: str) -> (int, datetime):

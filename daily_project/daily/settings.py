@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "polls",
-    "debug_toolbar"
 ]
 
 MIDDLEWARE = [
@@ -49,7 +48,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "daily.urls"
@@ -124,3 +122,15 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+IS_TESTING = False
+
+try:
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+
+    cred = credentials.Certificate("./daily-user-creation-firebase-adminsdk-bkli4-538450d146.json")
+    firebase_admin.initialize_app(cred)
+    DEFAULT_APP = firestore.client()
+except Exception as e:
+    raise e
+# DEFAULT_APP = MockFirestore()

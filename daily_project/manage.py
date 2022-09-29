@@ -2,14 +2,6 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-import firebase_admin
-from firebase_admin import credentials
-
-try:
-    cred = credentials.Certificate("./daily-user-creation-firebase-adminsdk-bkli4-538450d146.json")
-    DEFAULT_APP = firebase_admin.initialize_app(cred)
-except Exception as e:
-    raise e
 
 
 def main():

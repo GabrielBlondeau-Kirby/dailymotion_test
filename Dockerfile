@@ -9,4 +9,6 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["python", "daily/manage.py", "runserver", "0.0.0.0:8000"]
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-u", "daily_project/manage.py", "runserver", "0.0.0.0:8000"]

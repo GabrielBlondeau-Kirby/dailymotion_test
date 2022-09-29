@@ -1,8 +1,10 @@
-from django.db import models
-from datetime import datetime
-from firebase_admin import firestore
 
-# Create your models here.
+from django.db import models
+from django.conf import settings
+
+from datetime import datetime
+
+from mockfirestore import Timestamp
 
 
 class base_object:
@@ -13,7 +15,7 @@ class base_object:
         self.uuid: str = None
 
     def create(self, data):
-        db = firestore.client()
+        db = settings.DEFAULT_APP
         obj = db.collection(self.collection).add(data)
         self.uuid = obj[1].id
         self.created_at = obj[0]    # with nanosecond will see if I need to change it
@@ -23,7 +25,7 @@ class base_object:
         return self, obj
 
     def update(self, data: dict = None, uuid: str = None):
-        db = firestore.client()
+        db = settings.DEFAULT_APP
         uuid = uuid if self.uuid is None else self.uuid
         print(f"updating user {uuid} | data: {data}")
         if uuid is None:
@@ -34,10 +36,11 @@ class base_object:
         return self
 
     def get_by_email(self, email: str):
-        db = firestore.client()
+        db = settings.DEFAULT_APP
 
         # I should check the count of the Query's result
-        doc = db.collection(self.collection).where('email', '==', email).get()[0]
+        print(f"Users:{db.collection(self.collection).get()}")
+        doc = list(db.collection(self.collection).where('email', '==', email).get())[0]
         self.uuid = doc.id
         for att, value in doc.to_dict().items():
             self.__setattr__(att, value)
@@ -76,7 +79,12 @@ class User(base_object):
         return self
 
     def to_json(self):
-        return self.__dict__
+        d = self.__dict__
+        d.pop("password", None)
+        for k, v in d.items():
+            if isinstance(v, Timestamp):
+                d[k] = str(v.seconds)
+        return d
 
 
 class Verification_code(models.Model):
