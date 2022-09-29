@@ -52,11 +52,7 @@ def create_user(request: Request):
 
     user.update({"code": code, "code_end_on": end.timestamp()})
 
-    resp = {
-        "user": user.to_json(),
-    }
-
-    return JsonResponse(resp)
+    return JsonResponse(user.to_json())
 
 
 @api_view(["POST"])

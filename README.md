@@ -70,17 +70,15 @@ curl --location --request POST 'http://localhost:8000/polls/create_user' \
 #### E.Q Response
 ```
 {
-    "user": {
-        "collection": "users",
-        "created_at": "2022-09-29T18:55:29.021Z",
-        "updated_at": "2022-09-29T18:55:29.021Z",
-        "uuid": "ji6wvntrxaOT2HG6N5ty",
-        "email": "gabriel3@gmail.com",
-        "is_verified": false,
-        "status": "created",
-        "code": 2417,
-        "code_end_on": 1664477789.118678
-    }
+    "collection": "users",
+    "created_at": "2022-09-29T18:55:29.021Z",
+    "updated_at": "2022-09-29T18:55:29.021Z",
+    "uuid": "ji6wvntrxaOT2HG6N5ty",
+    "email": "gabriel3@gmail.com",
+    "is_verified": false,
+    "status": "created",
+    "code": 2417,
+    "code_end_on": 1664477789.118678
 }
 ```
 
